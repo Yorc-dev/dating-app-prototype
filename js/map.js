@@ -1,5 +1,8 @@
 // Map functionality for LoveMap
 
+// Constants
+const MATCH_PROBABILITY = 0.2; // 20% chance of mutual match for demo
+
 // Check authentication
 checkAuth();
 
@@ -195,8 +198,8 @@ function handleLike(userId, userName, initials) {
     likeBtn.classList.add('liked');
     likeBtn.innerHTML = '❤️ Liked';
     
-    // Simulate mutual match (20% chance for demo purposes)
-    if (Math.random() < 0.2) {
+    // Simulate mutual match (configurable probability for demo purposes)
+    if (Math.random() < MATCH_PROBABILITY) {
       setTimeout(() => {
         showMatchModal(userName, initials);
         addMatch(userId);

@@ -84,6 +84,14 @@ const mockUsers = [
   }
 ];
 
+// Helper function to get initials from name
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return 'YU';
+  const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
+  if (parts.length === 0) return 'YU';
+  return parts.map(n => n[0]).join('').toUpperCase().substring(0, 2);
+}
+
 // Current user mock data
 const currentUser = {
   id: 0,
@@ -92,7 +100,7 @@ const currentUser = {
   bio: localStorage.getItem('userBio') || 'Welcome to LoveMap!',
   lat: 40.7589,
   lng: -73.9851,
-  initials: (localStorage.getItem('userName') || 'YU').split(' ').map(n => n[0]).join('').toUpperCase()
+  initials: getInitials(localStorage.getItem('userName') || 'You')
 };
 
 // Mock notifications
@@ -145,12 +153,13 @@ function formatDistance(km) {
   return `${km.toFixed(1)}km away`;
 }
 
-// Check if user is logged in
+// Check authentication
 function checkAuth() {
   const isLoggedIn = localStorage.getItem('isLoggedIn');
-  if (!isLoggedIn && !window.location.pathname.includes('index.html') && 
-      !window.location.pathname.includes('register.html') &&
-      window.location.pathname !== '/') {
+  const path = window.location.pathname;
+  const isAuthPage = path.includes('index.html') || path.includes('register.html') || path === '/' || path.endsWith('/');
+  
+  if (!isLoggedIn && !isAuthPage) {
     window.location.href = 'index.html';
   }
 }

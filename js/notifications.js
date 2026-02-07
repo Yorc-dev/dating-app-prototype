@@ -1,5 +1,8 @@
 // Notifications functionality for LoveMap
 
+// Constants
+const MATCH_PROBABILITY = 0.2; // 20% chance of mutual match for demo
+
 // Check authentication
 checkAuth();
 

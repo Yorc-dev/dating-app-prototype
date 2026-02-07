@@ -231,7 +231,17 @@ Uses localStorage for:
 
 ## 🔐 Privacy & Security Notes
 
-This is a **prototype** with mock data for demonstration purposes only. In a production environment, you would need:
+This is a **prototype** with mock data for demonstration purposes only. 
+
+**Important Security Limitations:**
+- No real authentication - accepts any email/password
+- No password strength validation beyond minlength
+- No input sanitization (could be XSS vulnerable in production)
+- Data stored in localStorage without encryption
+- No CSRF protection
+- No rate limiting
+
+In a production environment, you would need:
 
 - Secure authentication (JWT, OAuth)
 - HTTPS encryption

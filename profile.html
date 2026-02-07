@@ -162,7 +162,15 @@
       const userAge = localStorage.getItem('userAge') || '25';
       const userEmail = localStorage.getItem('userEmail') || 'Not set';
       const userBio = localStorage.getItem('userBio') || 'No bio yet';
-      const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+      
+      // Helper function to get initials safely
+      function getInitials(name) {
+        const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
+        if (parts.length === 0) return 'GU';
+        return parts.map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      }
+      
+      const initials = getInitials(userName);
 
       // Update profile display
       document.getElementById('userAvatar').textContent = initials;
