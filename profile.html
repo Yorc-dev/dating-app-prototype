@@ -27,8 +27,8 @@
   <div class="profile-container">
     <!-- Tab Navigation -->
     <div class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('edit-profile')">Edit Profile</button>
-      <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+      <button class="tab-btn active" onclick="switchTab('edit-profile', this)">Edit Profile</button>
+      <button class="tab-btn" onclick="switchTab('settings', this)">Settings</button>
     </div>
 
     <!-- Edit Profile Tab -->
@@ -74,10 +74,9 @@
             <label for="editBio">Bio</label>
             <textarea 
               id="editBio" 
-              class="form-input" 
+              class="form-input form-textarea" 
               placeholder="Tell us about yourself"
               rows="4"
-              style="resize: vertical; font-family: inherit;"
             ></textarea>
           </div>
 
@@ -135,15 +134,14 @@
           <input 
             type="range" 
             id="searchRadius" 
-            class="radius-slider"
+            class="radius-slider radius-slider-container"
             min="1" 
             max="50" 
             value="5" 
             step="1"
-            style="width: 100%;"
             oninput="updateRadiusDisplay()"
           >
-          <div class="setting-value" id="currentRadius" style="text-align: center; margin-top: 8px;">5 km</div>
+          <div class="setting-value radius-display" id="currentRadius">5 km</div>
         </div>
       </div>
 
@@ -185,7 +183,7 @@
           Logout
         </button>
         
-        <button class="btn" style="background: #dc3545; color: white;" onclick="handleDeleteAccount()">
+        <button class="btn btn-danger" onclick="handleDeleteAccount()">
           Delete Account
         </button>
       </div>
@@ -230,13 +228,13 @@
     checkAuth();
 
     // Tab switching function
-    function switchTab(tabId) {
+    function switchTab(tabId, button) {
       // Remove active class from all tabs and content
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
       
       // Add active class to clicked tab and corresponding content
-      event.target.classList.add('active');
+      button.classList.add('active');
       document.getElementById(tabId).classList.add('active');
     }
 
