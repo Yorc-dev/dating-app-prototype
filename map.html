@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map - LoveMap</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/components.css">
+  <!-- Map will use custom CSS-based implementation when Leaflet is unavailable -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        onerror="document.getElementById('mapFallback').style.display='block'" />
+</head>
+<body>
+  <div class="map-container">
+    <div id="map"></div>
+    
+    <!-- Radius Control -->
+    <div class="radius-control">
+      <h3>Search Radius</h3>
+      <input 
+        type="range" 
+        class="radius-slider" 
+        id="radiusSlider" 
+        min="1" 
+        max="10" 
+        value="5" 
+        step="0.5"
+      >
+      <div class="radius-value">
+        <span id="radiusValue">5</span> km
+      </div>
+    </div>
+
+    <!-- My Location Button -->
+    <button class="locate-button" id="locateBtn" title="Center on my location">
+      📍
+    </button>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+      <a href="map.html" class="nav-item active">
+        <span>🗺️</span>
+        <small>Map</small>
+      </a>
+      <a href="notifications.html" class="nav-item" style="position: relative;">
+        <span>🔔</span>
+        <small>Notifications</small>
+        <span class="nav-badge" id="notificationBadge" style="display: none;">0</span>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <span>👤</span>
+        <small>Profile</small>
+      </a>
+    </nav>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal" id="userModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Profile</h2>
+        <button class="modal-close" onclick="closeUserModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-card" id="profileCard">
+          <!-- Profile content will be injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Modal -->
+  <div class="modal" id="matchModal">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="match-modal">
+          <div class="match-celebration">💕</div>
+          <h2 class="match-title">It's a Match!</h2>
+          <p class="match-message">You and <span id="matchName"></span> liked each other!</p>
+          <div class="match-users">
+            <div class="match-user-avatar" id="matchAvatar1">YU</div>
+            <div style="font-size: 32px; color: var(--accent-color);">❤️</div>
+            <div class="match-user-avatar" id="matchAvatar2">--</div>
+          </div>
+          <button class="btn btn-primary" onclick="closeMatchModal()">
+            Continue Exploring
+          </button>
+          <button class="btn btn-secondary mt-2" onclick="closeMatchModal()">
+            Start Chatting
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Constants
+    const MATCH_PROBABILITY = 0.2; // 20% chance of mutual match for demo
+    
+    // Map fallback when Leaflet is unavailable
+    function loadMapFallback() {
+      console.log('Loading map fallback...');
+      const mapDiv = document.getElementById('map');
+      mapDiv.style.background = '#e8f5e9';
+      mapDiv.style.position = 'relative';
+      mapDiv.style.overflow = 'hidden';
+      
+      // Create a simple grid background
+      mapDiv.innerHTML = `
+        <div style="width: 100%; height: 100%; position: relative; background: linear-gradient(0deg, #e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px); background-size: 50px 50px;">
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🗺️</div>
+            <h3 style="color: var(--text-primary); margin-bottom: 10px;">Interactive Map</h3>
+            <p style="color: var(--text-secondary); max-width: 300px; margin: 0 auto;">
+              Map functionality requires Leaflet.js library.<br>
+              In production, map would show user locations.
+            </p>
+          </div>
+          <div id="userMarkers" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        </div>
+      `;
+      
+      // Add user markers in fallback mode
+      const markersDiv = document.getElementById('userMarkers');
+      const centerX = mapDiv.offsetWidth / 2;
+      const centerY = mapDiv.offsetHeight / 2;
+      
+      // Add current user marker
+      const currentMarker = document.createElement('div');
+      currentMarker.className = 'user-marker current-user-marker';
+      currentMarker.textContent = currentUser.initials;
+      currentMarker.style.position = 'absolute';
+      currentMarker.style.left = centerX + 'px';
+      currentMarker.style.top = centerY + 'px';
+      currentMarker.style.transform = 'translate(-50%, -50%)';
+      markersDiv.appendChild(currentMarker);
+      
+      // Add other user markers in a circle
+      mockUsers.forEach((user, index) => {
+        const angle = (index / mockUsers.length) * 2 * Math.PI;
+        const radius = 150;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        
+        const marker = document.createElement('div');
+        marker.className = 'user-marker other-user-marker';
+        marker.textContent = user.initials;
+        marker.style.position = 'absolute';
+        marker.style.left = x + 'px';
+        marker.style.top = y + 'px';
+        marker.style.transform = 'translate(-50%, -50%)';
+        marker.style.cursor = 'pointer';
+        marker.onclick = () => showUserProfile(user);
+        markersDiv.appendChild(marker);
+      });
+      
+      setupModalFunctions();
+    }
+    
+    // Shared functions for fallback mode
+    function showUserProfile(user) {
+      const modal = document.getElementById('userModal');
+      const profileCard = document.getElementById('profileCard');
+      
+      const distance = calculateDistance(
+        currentUser.lat,
+        currentUser.lng,
+        user.lat,
+        user.lng
+      );
+      
+      const liked = isLiked(user.id);
+      
+      profileCard.innerHTML = `
+        <div class="profile-avatar">${user.initials}</div>
+        <div class="profile-name">${user.name}, ${user.age}</div>
+        <div class="profile-distance">${formatDistance(distance)}</div>
+        <div class="profile-bio">${user.bio}</div>
+        <div class="profile-interests">
+          ${user.interests.map(interest => `
+            <span class="interest-tag">${interest}</span>
+          `).join('')}
+        </div>
+        <div style="margin-top: 24px;">
+          <button 
+            class="btn-like ${liked ? 'liked' : ''}" 
+            onclick="handleLike(${user.id}, '${user.name}', '${user.initials}')"
+            id="likeBtn-${user.id}"
+          >
+            ${liked ? '❤️ Liked' : '🤍 Like'}
+          </button>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function closeUserModal() {
+      const modal = document.getElementById('userModal');
+      modal.classList.remove('active');
+    }
+
+    function handleLike(userId, userName, initials) {
+      const likeBtn = document.getElementById(`likeBtn-${userId}`);
+      
+      if (!isLiked(userId)) {
+        addLike(userId);
+        likeBtn.classList.add('liked');
+        likeBtn.innerHTML = '❤️ Liked';
+        
+        if (Math.random() < MATCH_PROBABILITY) {
+          setTimeout(() => {
+            showMatchModal(userName, initials);
+            addMatch(userId);
+          }, 500);
+        }
+      }
+    }
+
+    function showMatchModal(matchName, matchInitials) {
+      const matchModal = document.getElementById('matchModal');
+      document.getElementById('matchName').textContent = matchName;
+      document.getElementById('matchAvatar1').textContent = currentUser.initials;
+      document.getElementById('matchAvatar2').textContent = matchInitials;
+      
+      closeUserModal();
+      matchModal.classList.add('active');
+    }
+
+    function closeMatchModal() {
+      const matchModal = document.getElementById('matchModal');
+      matchModal.classList.remove('active');
+    }
+
+    function setupModalFunctions() {
+      // Close modal when clicking outside
+      document.getElementById('userModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeUserModal();
+        }
+      });
+    }
+
+    // Update notification badge
+    function updateNotificationBadge() {
+      const badge = document.getElementById('notificationBadge');
+      const count = getUnreadNotificationsCount();
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  </script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+          onerror="loadMapFallback()"></script>
+  <script>
+    // Check if Leaflet loaded, otherwise use fallback
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (typeof L === 'undefined') {
+          loadMapFallback();
+        } else {
+          // Load the normal map.js
+          const script = document.createElement('script');
+          script.src = 'js/map.js';
+          document.body.appendChild(script);
+        }
+      }, 100);
+      
+      updateNotificationBadge();
+    });
+  </script>
+</body>
+</html>

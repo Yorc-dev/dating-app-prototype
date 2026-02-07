@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - LoveMap</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app-header">
+    <div class="header-content">
+      <h1 class="header-title">My Profile</h1>
+    </div>
+  </div>
+
+  <div class="profile-container">
+    <!-- User Info Section -->
+    <div class="profile-section">
+      <div class="profile-card">
+        <div class="profile-avatar" id="userAvatar">YU</div>
+        <div class="profile-name" id="userName">Your Name</div>
+        <div class="profile-info" id="userInfo">Welcome to LoveMap!</div>
+      </div>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="profile-section">
+      <h2>Settings</h2>
+      
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Search Radius</div>
+          <div class="setting-value" id="currentRadius">5 km</div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Email</div>
+          <div class="setting-value" id="userEmail">Not set</div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Privacy Settings</div>
+          <div class="setting-value">Public profile</div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Notifications</div>
+          <div class="setting-value">Enabled</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="profile-section">
+      <h2>Activity</h2>
+      
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Likes Given</div>
+          <div class="setting-value" id="likesGiven">0</div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Matches</div>
+          <div class="setting-value" id="matchCount">0</div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">Profile Views</div>
+          <div class="setting-value">Coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Section -->
+    <div class="profile-section">
+      <h2>Edit Profile</h2>
+      
+      <form id="editProfileForm">
+        <div class="form-group">
+          <label for="editName">Name</label>
+          <input 
+            type="text" 
+            id="editName" 
+            class="form-input" 
+            placeholder="Your name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="editAge">Age</label>
+          <input 
+            type="number" 
+            id="editAge" 
+            class="form-input" 
+            placeholder="Your age"
+            min="18"
+            max="99"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="editBio">Bio</label>
+          <input 
+            type="text" 
+            id="editBio" 
+            class="form-input" 
+            placeholder="Tell us about yourself"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Save Changes
+        </button>
+      </form>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="profile-section">
+      <button class="btn btn-secondary" onclick="handleLogout()">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <a href="map.html" class="nav-item">
+      <span>🗺️</span>
+      <small>Map</small>
+    </a>
+    <a href="notifications.html" class="nav-item" style="position: relative;">
+      <span>🔔</span>
+      <small>Notifications</small>
+      <span class="nav-badge" id="notificationBadge" style="display: none;">0</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <span>👤</span>
+      <small>Profile</small>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Check authentication
+    checkAuth();
+
+    // Load user profile data
+    function loadProfile() {
+      const userName = localStorage.getItem('userName') || 'Guest User';
+      const userAge = localStorage.getItem('userAge') || '25';
+      const userEmail = localStorage.getItem('userEmail') || 'Not set';
+      const userBio = localStorage.getItem('userBio') || 'No bio yet';
+      
+      // Helper function to get initials safely
+      function getInitials(name) {
+        const parts = name.trim().split(/\s+/).filter(part => part.length > 0);
+        if (parts.length === 0) return 'GU';
+        return parts.map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      }
+      
+      const initials = getInitials(userName);
+
+      // Update profile display
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent = `${userName}, ${userAge}`;
+      document.getElementById('userInfo').textContent = userBio;
+      document.getElementById('userEmail').textContent = userEmail;
+
+      // Update edit form
+      document.getElementById('editName').value = userName;
+      document.getElementById('editAge').value = userAge;
+      document.getElementById('editBio').value = userBio;
+
+      // Update stats
+      const likes = JSON.parse(localStorage.getItem('likes') || '[]');
+      const matches = JSON.parse(localStorage.getItem('matches') || '[]');
+      document.getElementById('likesGiven').textContent = likes.length;
+      document.getElementById('matchCount').textContent = matches.length;
+    }
+
+    // Handle profile edit form
+    document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('editName').value;
+      const age = document.getElementById('editAge').value;
+      const bio = document.getElementById('editBio').value;
+
+      // Save to localStorage
+      localStorage.setItem('userName', name);
+      localStorage.setItem('userAge', age);
+      localStorage.setItem('userBio', bio);
+
+      // Reload profile
+      loadProfile();
+
+      // Show success message
+      alert('Profile updated successfully!');
+    });
+
+    // Handle logout
+    function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        logout();
+      }
+    }
+
+    // Update notification badge
+    function updateNotificationBadge() {
+      const badge = document.getElementById('notificationBadge');
+      const count = getUnreadNotificationsCount();
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Initialize
+    loadProfile();
+    updateNotificationBadge();
+  </script>
+</body>
+</html>
