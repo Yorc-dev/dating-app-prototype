@@ -3,4 +3,5 @@
 Mobile dating application prototype with map-based user discovery.
 
 ## Coming soon...
-Full prototype is being developed.
+
+Full interactive prototype is being developed.
