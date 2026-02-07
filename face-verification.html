@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Verification - LoveMap</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <div class="verification-container">
+      <h1 class="mb-2">Face ID Verification</h1>
+      <p class="text-center mb-3" style="color: var(--text-secondary);">
+        Position your face within the circle
+      </p>
+
+      <div class="face-scanner">
+        👤
+      </div>
+
+      <div id="verificationStatus" class="text-center mb-3">
+        <p style="color: var(--text-secondary);">Scanning...</p>
+      </div>
+
+      <button id="continueBtn" class="btn btn-primary" style="display: none;">
+        Continue to App
+      </button>
+
+      <div class="text-center mt-2">
+        <a href="index.html" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">
+          Skip for now
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Simulate face verification
+    let progress = 0;
+    const statusElement = document.getElementById('verificationStatus');
+    const continueBtn = document.getElementById('continueBtn');
+
+    const verificationSteps = [
+      { text: 'Scanning...', duration: 1000 },
+      { text: 'Analyzing features...', duration: 1500 },
+      { text: 'Verification complete! ✓', duration: 1000 }
+    ];
+
+    let currentStep = 0;
+
+    function updateVerification() {
+      if (currentStep < verificationSteps.length) {
+        const step = verificationSteps[currentStep];
+        statusElement.innerHTML = `<p style="color: var(--text-primary); font-weight: 600;">${step.text}</p>`;
+        
+        setTimeout(() => {
+          currentStep++;
+          if (currentStep < verificationSteps.length) {
+            updateVerification();
+          } else {
+            // Show continue button
+            continueBtn.style.display = 'block';
+            statusElement.innerHTML = '<p style="color: var(--accent-color); font-weight: 600;">✓ Verified Successfully!</p>';
+          }
+        }, step.duration);
+      }
+    }
+
+    // Start verification after a brief delay
+    setTimeout(updateVerification, 500);
+
+    // Handle continue button
+    continueBtn.addEventListener('click', function() {
+      window.location.href = 'map.html';
+    });
+  </script>
+</body>
+</html>
